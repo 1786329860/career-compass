@@ -30,6 +30,7 @@ function Interview() {
   const [error, setError] = useState('')
   const [reportLoading, setReportLoading] = useState(false)
   const [reportProgress, setReportProgress] = useState(0)
+  const [reportError, setReportError] = useState('')
   const chatEndRef = useRef(null)
 
   useEffect(() => {
@@ -95,10 +96,10 @@ function Interview() {
             setReport(reportData)
             setReportLoading(false)
           }, 500)
-        } catch {
+        } catch (err) {
           clearInterval(progressTimer)
-          setReportProgress(0)
           setReportLoading(false)
+          setReportError(err.message || '报告生成失败，请重试')
         }
       } else {
         setMessages((prev) => [...prev, { role: 'ai', content: data.ai_reply || '' }])
@@ -312,16 +313,48 @@ function Interview() {
           </div>
         ) : (
           <div className="bg-white rounded-xl shadow-sm border border-[var(--border)] p-12 text-center">
-            <p className="text-[var(--text-secondary)] mb-4">报告生成中，请稍候...</p>
-            <div className="max-w-xs mx-auto">
-              <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-indigo-600 rounded-full transition-all duration-500"
-                  style={{ width: `${reportProgress}%` }}
-                />
-              </div>
-              <p className="text-xs text-[var(--text-secondary)] mt-2">{reportProgress}%</p>
-            </div>
+            {reportError ? (
+              <>
+                <p className="text-red-500 mb-4">{reportError}</p>
+                <button
+                  onClick={async () => {
+                    setReportError('')
+                    setReportProgress(0)
+                    let progress = 0
+                    const timer = setInterval(() => {
+                      progress += Math.random() * 8 + 2
+                      if (progress > 90) progress = 90
+                      setReportProgress(Math.min(Math.round(progress), 90))
+                    }, 1500)
+                    try {
+                      const reportData = await getInterviewReport({ session_id: sessionId })
+                      clearInterval(timer)
+                      setReportProgress(100)
+                      setTimeout(() => setReport(reportData), 500)
+                    } catch (err) {
+                      clearInterval(timer)
+                      setReportError(err.message || '报告生成失败，请重试')
+                    }
+                  }}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors"
+                >
+                  重新生成报告
+                </button>
+              </>
+            ) : (
+              <>
+                <p className="text-[var(--text-secondary)] mb-4">报告生成中，请稍候...</p>
+                <div className="max-w-xs mx-auto">
+                  <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-indigo-600 rounded-full transition-all duration-500"
+                      style={{ width: `${reportProgress}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-[var(--text-secondary)] mt-2">{reportProgress}%</p>
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>

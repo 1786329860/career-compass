@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const api = axios.create({
   baseURL: '/api',
-  timeout: 60000,
+  timeout: 300000, // 5分钟，报告生成需要较长时间
 })
 
 // 请求拦截器
