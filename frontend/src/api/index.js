@@ -15,7 +15,14 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    const message = error.response?.data?.detail || error.message || '请求失败'
+    let message = '请求失败'
+    if (error.response?.data?.detail) {
+      message = typeof error.response.data.detail === 'string'
+        ? error.response.data.detail
+        : JSON.stringify(error.response.data.detail)
+    } else if (error.message) {
+      message = error.message
+    }
     return Promise.reject(new Error(message))
   }
 )
