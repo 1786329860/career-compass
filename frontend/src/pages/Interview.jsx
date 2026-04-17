@@ -28,6 +28,8 @@ function Interview() {
   const [loading, setLoading] = useState(false)
   const [report, setReport] = useState(null)
   const [error, setError] = useState('')
+  const [reportLoading, setReportLoading] = useState(false)
+  const [reportProgress, setReportProgress] = useState(0)
   const chatEndRef = useRef(null)
 
   useEffect(() => {
@@ -74,13 +76,29 @@ function Interview() {
       })
       if (data.is_finished) {
         setMessages((prev) => [...prev, { role: 'ai', content: data.ai_reply || '面试结束，感谢你的参与！' }])
-        // 自动获取报告
+        // 自动获取报告，带进度条
+        setReportLoading(true)
+        setReportProgress(0)
+        setPhase('report')
+        // 模拟进度条动画
+        let progress = 0
+        const progressTimer = setInterval(() => {
+          progress += Math.random() * 8 + 2
+          if (progress > 90) progress = 90
+          setReportProgress(Math.min(Math.round(progress), 90))
+        }, 1500)
         try {
           const reportData = await getInterviewReport({ session_id: sessionId })
-          setReport(reportData)
-          setPhase('report')
+          clearInterval(progressTimer)
+          setReportProgress(100)
+          setTimeout(() => {
+            setReport(reportData)
+            setReportLoading(false)
+          }, 500)
         } catch {
-          setPhase('report')
+          clearInterval(progressTimer)
+          setReportProgress(0)
+          setReportLoading(false)
         }
       } else {
         setMessages((prev) => [...prev, { role: 'ai', content: data.ai_reply || '' }])
@@ -294,7 +312,18 @@ function Interview() {
           </div>
         ) : (
           <div className="bg-white rounded-xl shadow-sm border border-[var(--border)] p-12 text-center">
-            <p className="text-[var(--text-secondary)]">报告生成中，请稍候...</p>
+            <p className="text-[var(--text-secondary)] mb-4">报告生成中，请稍候...</p>
+            {reportLoading && (
+              <div className="max-w-xs mx-auto">
+                <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-indigo-600 rounded-full transition-all duration-500"
+                    style={{ width: `${reportProgress}%` }}
+                  />
+                </div>
+                <p className="text-xs text-[var(--text-secondary)] mt-2">{reportProgress}%</p>
+              </div>
+            )}
           </div>
         )}
       </div>

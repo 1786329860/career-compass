@@ -59,50 +59,34 @@ def _build_report_prompt(job_type: str, target_job: str, qa_list: list) -> str:
     """构建面试报告生成的 system prompt。"""
     qa_text = ""
     for i, qa in enumerate(qa_list, 1):
-        qa_text += f"\n问题{i}：{qa['question']}\n回答：{qa['answer']}\n"
+        # 截断过长的回答，保留核心内容
+        answer = qa['answer'][:300] if len(qa['answer']) > 300 else qa['answer']
+        qa_text += f"\n问题{i}：{qa['question']}\n回答：{answer}\n"
 
-    return f"""你是一位资深的面试评估专家，请根据以下面试记录生成评估报告。
+    return f"""你是一位资深面试评估专家，根据面试记录生成评估报告。
 
-## 面试信息
-- 目标岗位：{target_job}
-- 面试类型：{job_type}
+岗位：{target_job}，类型：{job_type}
 
-## 面试记录
+面试记录：
 {qa_text}
 
-## 输出格式要求
-你必须严格以 JSON 格式返回，不要添加任何其他文字说明。JSON 结构如下：
-```json
+严格以 JSON 返回，不要任何其他文字：
 {{
   "total_score": 7,
   "dimension_scores": [
-    {{"name": "专业能力", "score": 7, "comment": "评语"}},
-    {{"name": "表达能力", "score": 8, "comment": "评语"}},
-    {{"name": "逻辑思维", "score": 7, "comment": "评语"}},
-    {{"name": "岗位匹配", "score": 6, "comment": "评语"}},
-    {{"name": "综合素质", "score": 7, "comment": "评语"}}
+    {{"name": "专业能力", "score": 7, "comment": "简短评语"}},
+    {{"name": "表达能力", "score": 8, "comment": "简短评语"}},
+    {{"name": "逻辑思维", "score": 7, "comment": "简短评语"}},
+    {{"name": "岗位匹配", "score": 6, "comment": "简短评语"}},
+    {{"name": "综合素质", "score": 7, "comment": "简短评语"}}
   ],
   "details": [
-    {{
-      "question": "面试问题",
-      "user_answer": "用户回答",
-      "score": 7,
-      "feedback": "评价反馈",
-      "reference_answer": "参考答案"
-    }}
+    {{"question": "问题", "user_answer": "回答摘要", "score": 7, "feedback": "简短反馈", "reference_answer": "参考答案要点"}}
   ],
-  "top_improvements": ["改进建议1", "改进建议2", "改进建议3"]
+  "top_improvements": ["建议1", "建议2", "建议3"]
 }}
-```
 
-## 注意事项
-- total_score 范围 1-10，是所有问题得分的综合评分
-- dimension_scores 包含 5 个维度：专业能力、表达能力、逻辑思维、岗位匹配、综合素质
-- 每个维度 score 范围 1-10
-- details 对应每一道面试题的评估
-- 每道题 score 范围 1-10
-- top_improvements 至少 3 条改进建议
-- 所有内容用中文"""
+要求：total_score 1-10，维度 score 1-10，每题 score 1-10，评语和反馈简洁，top_improvements 至少3条。全中文。"""
 
 
 @router.post("/start", response_model=InterviewStartResponse)
