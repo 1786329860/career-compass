@@ -313,17 +313,15 @@ function Interview() {
         ) : (
           <div className="bg-white rounded-xl shadow-sm border border-[var(--border)] p-12 text-center">
             <p className="text-[var(--text-secondary)] mb-4">报告生成中，请稍候...</p>
-            {reportLoading && (
-              <div className="max-w-xs mx-auto">
-                <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-indigo-600 rounded-full transition-all duration-500"
-                    style={{ width: `${reportProgress}%` }}
-                  />
-                </div>
-                <p className="text-xs text-[var(--text-secondary)] mt-2">{reportProgress}%</p>
+            <div className="max-w-xs mx-auto">
+              <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-indigo-600 rounded-full transition-all duration-500"
+                  style={{ width: `${reportProgress}%` }}
+                />
               </div>
-            )}
+              <p className="text-xs text-[var(--text-secondary)] mt-2">{reportProgress}%</p>
+            </div>
           </div>
         )}
       </div>
