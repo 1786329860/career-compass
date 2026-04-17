@@ -138,6 +138,10 @@ class InterviewChatRequest(BaseModel):
     user_answer: str
 
 
+class InterviewReportRequest(BaseModel):
+    session_id: str
+
+
 class InterviewChatResponse(BaseModel):
     ai_reply: str
     is_finished: bool

@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException
 from app.models.schemas import (
     InterviewChatRequest,
     InterviewChatResponse,
+    InterviewReportRequest,
     InterviewReportResponse,
     InterviewStartRequest,
     InterviewStartResponse,
@@ -181,7 +182,7 @@ async def interview_chat(request: InterviewChatRequest):
 
 
 @router.post("/report", response_model=InterviewReportResponse)
-async def generate_report(request: InterviewChatRequest):
+async def generate_report(request: InterviewReportRequest):
     """生成面试评估报告。"""
     try:
         session = sessions.get(request.session_id)
